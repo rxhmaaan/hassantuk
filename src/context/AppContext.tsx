@@ -14,7 +14,7 @@ interface AppContextType {
   data: ActionItem[];
   photos: Record<string, string>;
   isLoaded: boolean;
-  uploadFiles: (excelFile: File | null, photoFiles: File[]) => Promise<void>;
+  uploadFiles: (excelFile: File | null, photoFiles: File[], photoKeyOverride?: string) => Promise<void>;
   uploading: boolean;
 }
 
@@ -34,7 +34,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setIsLoaded(true);
   }, []);
 
-  const uploadFiles = useCallback(async (excelFile: File | null, photoFiles: File[]) => {
+  const uploadFiles = useCallback(async (excelFile: File | null, photoFiles: File[], photoKeyOverride?: string) => {
     setUploading(true);
     try {
       if (excelFile) {
@@ -45,8 +45,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       if (photoFiles.length > 0) {
         const newPhotos: Record<string, string> = {};
-        for (const file of photoFiles) {
-          const key = photoFileToKey(file.name);
+        for (let i = 0; i < photoFiles.length; i++) {
+          const file = photoFiles[i];
+          // If a single file is uploaded with an override key (from Settings page), use that key
+          const key = (photoKeyOverride && photoFiles.length === 1) ? photoKeyOverride : photoFileToKey(file.name);
           const dataUrl = await readFileAsDataUrl(file);
           newPhotos[key] = dataUrl;
         }

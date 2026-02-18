@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, LayoutDashboard, ChevronDown, LogOut } from 'lucide-react';
+import { Upload, LayoutDashboard, Settings } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { UploadModal } from './UploadModal';
 import { useAppData } from '../context/AppContext';
@@ -33,6 +33,15 @@ export function TopNav() {
               }`}
             >
               Dashboard
+            </Link>
+            <Link
+              to="/settings"
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                location.pathname === '/settings' ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <Settings size={14} />
+              Settings
             </Link>
           </div>
 
