@@ -4,7 +4,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
-  base: "/hassantuk-pulse-plan/", // 👈 THIS IS THE FIX
+  base: "/hassantuk/", // 👈 THIS IS THE FIX
 
   server: {
     host: "::",
