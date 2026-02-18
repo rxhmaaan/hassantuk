@@ -4,36 +4,36 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    --background: 20 10% 96%;
+    --foreground: 0 20% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 0 20% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 0 20% 12%;
 
-    --primary: 221 83% 33%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 0 72% 32%;
+    --primary-foreground: 0 0% 98%;
 
-    --primary-light: 221 83% 45%;
-    --primary-dark: 221 83% 22%;
+    --primary-light: 0 72% 44%;
+    --primary-dark: 0 72% 20%;
 
-    --secondary: 215 25% 27%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0 20% 22%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 214 32% 91%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 0 12% 90%;
+    --muted-foreground: 0 8% 46%;
 
-    --accent: 214 32% 91%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 0 12% 90%;
+    --accent-foreground: 0 20% 12%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 221 83% 33%;
+    --border: 0 12% 87%;
+    --input: 0 12% 87%;
+    --ring: 0 72% 32%;
 
     --radius: 0.5rem;
 
@@ -43,7 +43,7 @@
     --status-rejected: 0 84% 60%;
     --status-in-progress: 45 93% 47%;
     --status-partially-done: 25 95% 53%;
-    --status-other: 215 16% 47%;
+    --status-other: 0 8% 46%;
 
     /* Chart colors */
     --chart-done: 142 76% 36%;
@@ -52,20 +52,20 @@
     --chart-in-progress: 199 89% 48%;
     --chart-partially-done: 25 95% 53%;
 
-    --sidebar-background: 221 83% 20%;
-    --sidebar-foreground: 210 40% 95%;
-    --sidebar-primary: 210 40% 98%;
-    --sidebar-primary-foreground: 221 83% 33%;
-    --sidebar-accent: 221 83% 28%;
-    --sidebar-accent-foreground: 210 40% 95%;
-    --sidebar-border: 221 83% 28%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-background: 0 72% 16%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 0 0% 98%;
+    --sidebar-primary-foreground: 0 72% 32%;
+    --sidebar-accent: 0 72% 24%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 72% 24%;
+    --sidebar-ring: 0 72% 55%;
 
     /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(221 83% 20%), hsl(221 83% 33%));
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 40% 98%));
-    --shadow-card: 0 2px 8px rgba(30, 58, 138, 0.08), 0 0 0 1px rgba(30, 58, 138, 0.05);
-    --shadow-card-hover: 0 8px 24px rgba(30, 58, 138, 0.15), 0 0 0 1px rgba(30, 58, 138, 0.1);
+    --gradient-hero: linear-gradient(135deg, hsl(0 72% 16%), hsl(0 72% 32%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(20 10% 96%));
+    --shadow-card: 0 2px 8px rgba(120, 20, 20, 0.08), 0 0 0 1px rgba(120, 20, 20, 0.05);
+    --shadow-card-hover: 0 8px 24px rgba(120, 20, 20, 0.15), 0 0 0 1px rgba(120, 20, 20, 0.1);
   }
 }
 
