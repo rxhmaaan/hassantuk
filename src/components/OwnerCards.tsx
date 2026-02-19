@@ -17,7 +17,7 @@ function ProgressBar({ tasks }: { tasks: { update: string }[] }) {
   const segments = tasks.map((t) => {
     const s = t.update;
     if (s === 'Done') return 'done';
-    if (s === 'Rjected') return 'rejected';
+    if (s === 'Rejected') return 'rejected';
     if (s === 'Partially Done') return 'partial';
     if (s === 'In Progress') return 'inprogress';
     return 'pending';
@@ -47,7 +47,6 @@ function ProgressBar({ tasks }: { tasks: { update: string }[] }) {
 function OwnerCard({ owner, tasks, photo }: OwnerCardProps) {
   const navigate = useNavigate();
   const done = tasks.filter((t) => t.update === 'Done').length;
-  const pending = tasks.filter((t) => t.update !== 'Done' && t.update !== '').length;
   const donePercent = tasks.length ? Math.round((done / tasks.length) * 100) : 0;
 
   return (
@@ -98,7 +97,7 @@ function OwnerCard({ owner, tasks, photo }: OwnerCardProps) {
           </div>
           <div className="bg-muted/50 rounded-lg px-3 py-2 text-center">
             <div className="text-lg font-bold text-status-pending">{tasks.length - done}</div>
-            <div className="text-xs text-muted-foreground">Pending</div>
+            <div className="text-xs text-muted-foreground">Not Done</div>
           </div>
         </div>
 
@@ -117,12 +116,11 @@ function OwnerCard({ owner, tasks, photo }: OwnerCardProps) {
 export function OwnerCards() {
   const { data, photos } = useAppData();
 
+  // OWNERS is already in alphabetical order
   const cardData = useMemo(() => {
     return OWNERS.map((owner) => {
-      const tasks = data.filter((item) =>
-        item.dashboardOwner.toLowerCase().includes(owner.name.split(' ')[0].toLowerCase()) ||
-        item.dashboardOwner === owner.name
-      );
+      // Match exactly by dashboardOwner name
+      const tasks = data.filter((item) => item.dashboardOwner === owner.name);
       const photo = photos[owner.photoKey] || null;
       return { owner, tasks, photo };
     });

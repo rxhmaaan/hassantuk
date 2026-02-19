@@ -9,6 +9,7 @@ import OwnerDetail from "./pages/OwnerDetail";
 import Settings from "./pages/Settings";
 import { AppProvider } from "./context/AppContext";
 import { TopNav } from "./components/TopNav";
+import { AuthGate } from "./components/AuthGate";
 
 const queryClient = new QueryClient();
 
@@ -23,7 +24,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/owner/:ownerName" element={<OwnerDetail />} />
-            <Route path="/settings" element={<Settings />} />
+            <Route path="/settings" element={<AuthGate><Settings /></AuthGate>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -9,13 +9,13 @@ interface TasksTableProps {
 }
 
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
-  'Done': { label: '✅ Done', cls: 'bg-green-100 text-green-800 border border-green-200' },
-  'Pending': { label: '🟡 Pending', cls: 'bg-yellow-100 text-yellow-800 border border-yellow-200' },
-  'Rjected': { label: '🔴 Rejected', cls: 'bg-red-100 text-red-800 border border-red-200' },
-  'In Progress': { label: '🔵 In Progress', cls: 'bg-blue-100 text-blue-800 border border-blue-200' },
-  'Partially Done': { label: '🟠 Partially Done', cls: 'bg-orange-100 text-orange-800 border border-orange-200' },
-  'NA': { label: '⚪ NA', cls: 'bg-gray-100 text-gray-600 border border-gray-200' },
-  '': { label: '⚪ —', cls: 'bg-gray-100 text-gray-600 border border-gray-200' },
+  'Done': { label: '✅ Done', cls: 'bg-status-done/15 text-status-done border border-status-done/30' },
+  'Pending': { label: '🟡 Pending', cls: 'bg-status-pending/15 text-status-pending border border-status-pending/30' },
+  'Rejected': { label: '🔴 Rejected', cls: 'bg-status-rejected/15 text-status-rejected border border-status-rejected/30' },
+  'In Progress': { label: '🔵 In Progress', cls: 'bg-status-in-progress/15 text-status-in-progress border border-status-in-progress/30' },
+  'Partially Done': { label: '🟠 Partially Done', cls: 'bg-status-partially-done/15 text-status-partially-done border border-status-partially-done/30' },
+  'NA': { label: '⚪ NA', cls: 'bg-muted text-muted-foreground border border-border' },
+  '': { label: '⚪ —', cls: 'bg-muted text-muted-foreground border border-border' },
 };
 
 const PRIORITY_BADGE: Record<string, string> = {

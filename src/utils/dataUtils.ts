@@ -10,66 +10,7 @@ export function parseExcelFile(file: File): Promise<ActionItem[]> {
     reader.onload = (e) => {
       try {
         const data = new Uint8Array(e.target!.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array', cellDates: true });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' }) as unknown[][];
-
-        const items: ActionItem[] = [];
-        let id = 1;
-
-        // Header row is index 0, data starts at index 1
-        for (let i = 1; i < rows.length; i++) {
-          const row = rows[i] as unknown[];
-          if (!row || row.length < 7) continue;
-
-          // Columns: 0=Challenge, 1=num, 2=Area, 3=StreamOwner, 4=Priority, 5=num, 6=PlannedActions, 7=DashboardOwner, 8=Owner, 9=ECD, 10=Update, 11=Remarks
-          const plannedActions = String(row[6] || '').trim();
-          const dashboardOwner = String(row[7] || '').trim();
-          const owner = String(row[8] || '').trim();
-          
-          if (!plannedActions && !dashboardOwner) continue;
-
-          let ecd = '';
-          const rawEcd = row[9];
-          if (rawEcd instanceof Date) {
-            ecd = rawEcd.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-          } else if (rawEcd) {
-            const str = String(rawEcd).trim();
-            // Try to parse date strings
-            const parsed = new Date(str);
-            if (!isNaN(parsed.getTime())) {
-              ecd = parsed.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-            } else {
-              ecd = str;
-            }
-          }
-
-          const update = String(row[10] || '').trim();
-          const remarks = String(row[11] || '').trim();
-          const streamOwner = String(row[3] || '').trim();
-          const priority = String(row[4] || '').trim();
-          const challengeCategory = String(row[0] || '').trim();
-          const areaOfImprovement = String(row[2] || '').trim();
-
-          // Determine the actual dashboard owner - normalize names
-          const normalizedOwner = normalizeDashboardOwner(dashboardOwner);
-
-          items.push({
-            id: id++,
-            challengeCategory,
-            areaOfImprovement,
-            streamOwner,
-            priority,
-            plannedActions,
-            dashboardOwner: normalizedOwner || dashboardOwner,
-            owner,
-            ecd,
-            update: normalizeStatus(update),
-            remarks,
-          });
-        }
-
-        resolve(items);
+        resolve(parseExcelBuffer(data));
       } catch (err) {
         reject(err);
       }
@@ -77,6 +18,74 @@ export function parseExcelFile(file: File): Promise<ActionItem[]> {
     reader.onerror = reject;
     reader.readAsArrayBuffer(file);
   });
+}
+
+export function parseExcelBuffer(data: Uint8Array): ActionItem[] {
+  const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' }) as unknown[][];
+
+  const items: ActionItem[] = [];
+  let id = 1;
+
+  // Header row is index 0, data starts at index 1
+  // Columns: A=Challenge(0), B=num(1), C=Area(2), D=StreamOwner(3), E=Priority(4), F=num(5), G=PlannedActions(6), H=DashboardOwner(7), I=Owner(8), J=ECD(9), K=Update(10), L=Remarks(11)
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i] as unknown[];
+    if (!row || row.length < 7) continue;
+
+    const plannedActions = String(row[6] || '').trim();
+    const dashboardOwner = String(row[7] || '').trim();
+    const owner = String(row[8] || '').trim();
+
+    if (!plannedActions && !dashboardOwner) continue;
+
+    let ecd = '';
+    const rawEcd = row[9];
+    if (rawEcd instanceof Date) {
+      ecd = rawEcd.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    } else if (rawEcd) {
+      const str = String(rawEcd).trim();
+      if (str && str !== '' && str.toLowerCase() !== 'tbd' && str.toLowerCase() !== 'na') {
+        const parsed = new Date(str);
+        if (!isNaN(parsed.getTime())) {
+          ecd = parsed.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        } else {
+          ecd = str;
+        }
+      } else {
+        ecd = str;
+      }
+    }
+
+    // Column K (index 10) is the Update/Status field
+    const rawUpdate = String(row[10] || '').trim();
+    const update = normalizeStatus(rawUpdate);
+
+    const remarks = String(row[11] || '').trim();
+    const streamOwner = String(row[3] || '').trim();
+    const priority = String(row[4] || '').trim();
+    const challengeCategory = String(row[0] || '').trim();
+    const areaOfImprovement = String(row[2] || '').trim();
+
+    const normalizedOwner = normalizeDashboardOwner(dashboardOwner);
+
+    items.push({
+      id: id++,
+      challengeCategory,
+      areaOfImprovement,
+      streamOwner,
+      priority,
+      plannedActions,
+      dashboardOwner: normalizedOwner || dashboardOwner,
+      owner,
+      ecd,
+      update,
+      remarks,
+    });
+  }
+
+  return items;
 }
 
 function normalizeDashboardOwner(name: string): string {
@@ -92,12 +101,15 @@ function normalizeDashboardOwner(name: string): string {
 
 function normalizeStatus(status: string): string {
   const s = status.trim();
-  if (!s || s === 'NA') return s;
-  if (s.toLowerCase() === 'done') return 'Done';
-  if (s.toLowerCase() === 'pending') return 'Pending';
-  if (s.toLowerCase() === 'rjected' || s.toLowerCase() === 'rejected') return 'Rjected';
-  if (s.toLowerCase() === 'in progress') return 'In Progress';
-  if (s.toLowerCase() === 'partially done') return 'Partially Done';
+  if (!s) return '';
+  const lower = s.toLowerCase();
+  if (lower === 'done') return 'Done';
+  if (lower === 'pending') return 'Pending';
+  if (lower === 'rejected' || lower === 'rjected') return 'Rejected';
+  if (lower === 'in progress') return 'In Progress';
+  if (lower === 'partially done') return 'Partially Done';
+  if (lower === 'not yet shared') return 'Pending';
+  if (lower === 'na' || lower === 'n/a') return 'NA';
   return s;
 }
 
@@ -140,7 +152,6 @@ export function loadPhotosFromStorage(): Record<string, string> | null {
 }
 
 export function photoFileToKey(filename: string): string {
-  // Ahmed-Fathy.jpg → Ahmed-Fathy
   return filename.replace(/\.[^/.]+$/, '');
 }
 
@@ -151,4 +162,15 @@ export function readFileAsDataUrl(file: File): Promise<string> {
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+}
+
+export async function loadDefaultExcelData(): Promise<ActionItem[]> {
+  try {
+    const response = await fetch('/data/action-plan.xlsx');
+    if (!response.ok) return [];
+    const buffer = await response.arrayBuffer();
+    return parseExcelBuffer(new Uint8Array(buffer));
+  } catch {
+    return [];
+  }
 }
