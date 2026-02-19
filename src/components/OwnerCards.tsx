@@ -46,8 +46,12 @@ function ProgressBar({ tasks }: { tasks: { update: string }[] }) {
 
 function OwnerCard({ owner, tasks, photo }: OwnerCardProps) {
   const navigate = useNavigate();
-  const done = tasks.filter((t) => t.update === 'Done').length;
-  const donePercent = tasks.length ? Math.round((done / tasks.length) * 100) : 0;
+  // KPI grouping: Completed=Done, Rejected=Rejected, Pending=Pending, InProgress=everything else
+  const completed  = tasks.filter((t) => t.update === 'Done').length;
+  const rejected   = tasks.filter((t) => t.update === 'Rejected').length;
+  const pending    = tasks.filter((t) => t.update === 'Pending').length;
+  const inProgress = tasks.filter((t) => t.update !== 'Done' && t.update !== 'Rejected' && t.update !== 'Pending').length;
+  const donePercent = tasks.length ? Math.round((completed / tasks.length) * 100) : 0;
 
   return (
     <div className="bg-card rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-200 flex flex-col overflow-hidden border border-border/50">
@@ -89,15 +93,23 @@ function OwnerCard({ owner, tasks, photo }: OwnerCardProps) {
           <ProgressBar tasks={tasks} />
         </div>
 
-        {/* Stats */}
+        {/* Stats — 4 KPI boxes */}
         <div className="grid grid-cols-2 gap-2 mb-5">
           <div className="bg-muted/50 rounded-lg px-3 py-2 text-center">
-            <div className="text-lg font-bold text-status-done">{done}</div>
-            <div className="text-xs text-muted-foreground">Done</div>
+            <div className="text-base font-bold text-status-done">{completed}</div>
+            <div className="text-xs text-muted-foreground">Completed</div>
           </div>
           <div className="bg-muted/50 rounded-lg px-3 py-2 text-center">
-            <div className="text-lg font-bold text-status-pending">{tasks.length - done}</div>
-            <div className="text-xs text-muted-foreground">Not Done</div>
+            <div className="text-base font-bold text-status-pending">{pending}</div>
+            <div className="text-xs text-muted-foreground">Pending</div>
+          </div>
+          <div className="bg-muted/50 rounded-lg px-3 py-2 text-center">
+            <div className="text-base font-bold text-status-in-progress">{inProgress}</div>
+            <div className="text-xs text-muted-foreground">In Progress</div>
+          </div>
+          <div className="bg-muted/50 rounded-lg px-3 py-2 text-center">
+            <div className="text-base font-bold text-status-rejected">{rejected}</div>
+            <div className="text-xs text-muted-foreground">Rejected</div>
           </div>
         </div>
 

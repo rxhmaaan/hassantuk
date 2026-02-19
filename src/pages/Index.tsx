@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useAppData } from '../context/AppContext';
 import { OwnerCards } from '../components/OwnerCards';
 import { TasksTable } from '../components/TasksTable';
-import { Upload, Users, CheckCircle, Clock, List } from 'lucide-react';
+import { Upload, Users } from 'lucide-react';
 import { UploadModal } from '../components/UploadModal';
 
 export default function Index() {
@@ -45,46 +45,47 @@ export default function Index() {
     );
   }
 
-  const doneCount = data.filter((d) => d.update === 'Done').length;
-  const pendingCount = data.filter((d) => d.update === 'Pending').length;
-  const inProgressCount = data.filter((d) => d.update === 'In Progress').length;
+  // KPI grouping rules:
+  // Completed = Done
+  // Rejected  = Rejected
+  // Pending   = Pending
+  // In Progress = everything else (In Progress, Partially Done, Not yet shared, blank, etc.)
+  const completedCount  = data.filter((d) => d.update === 'Done').length;
+  const rejectedCount   = data.filter((d) => d.update === 'Rejected').length;
+  const pendingCount    = data.filter((d) => d.update === 'Pending').length;
+  const inProgressCount = data.filter((d) => d.update !== 'Done' && d.update !== 'Rejected' && d.update !== 'Pending').length;
 
   return (
     <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-foreground">Action Plan Dashboard</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             Hassantuk — 16 Feb 2026 · {data.length} total tasks
           </p>
         </div>
-        {/* Summary Stats */}
+        {/* Summary KPI Boxes */}
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="bg-card rounded-xl px-4 py-2.5 shadow-card border border-border/50 text-center flex items-center gap-2">
-            <CheckCircle size={16} className="text-status-done" />
-            <div>
-              <div className="text-lg font-bold text-status-done">{doneCount}</div>
-              <div className="text-xs text-muted-foreground">Done</div>
-            </div>
+          <div className="bg-card rounded-xl px-4 py-2.5 shadow-card border border-border/50 text-center min-w-[80px]">
+            <div className="text-2xl font-bold text-primary">{data.length}</div>
+            <div className="text-xs text-muted-foreground font-medium">Total</div>
           </div>
-          <div className="bg-card rounded-xl px-4 py-2.5 shadow-card border border-border/50 text-center flex items-center gap-2">
-            <Clock size={16} className="text-status-in-progress" />
-            <div>
-              <div className="text-lg font-bold text-status-in-progress">{inProgressCount}</div>
-              <div className="text-xs text-muted-foreground">In Progress</div>
-            </div>
+          <div className="bg-card rounded-xl px-4 py-2.5 shadow-card border border-border/50 text-center min-w-[80px]">
+            <div className="text-2xl font-bold text-status-done">{completedCount}</div>
+            <div className="text-xs text-muted-foreground font-medium">Completed</div>
           </div>
-          <div className="bg-card rounded-xl px-4 py-2.5 shadow-card border border-border/50 text-center flex items-center gap-2">
-            <List size={16} className="text-status-pending" />
-            <div>
-              <div className="text-lg font-bold text-status-pending">{pendingCount}</div>
-              <div className="text-xs text-muted-foreground">Pending</div>
-            </div>
+          <div className="bg-card rounded-xl px-4 py-2.5 shadow-card border border-border/50 text-center min-w-[80px]">
+            <div className="text-2xl font-bold text-status-pending">{pendingCount}</div>
+            <div className="text-xs text-muted-foreground font-medium">Pending</div>
           </div>
-          <div className="bg-card rounded-xl px-4 py-2.5 shadow-card border border-border/50 text-center">
-            <div className="text-lg font-bold text-primary">{data.length}</div>
-            <div className="text-xs text-muted-foreground">Total</div>
+          <div className="bg-card rounded-xl px-4 py-2.5 shadow-card border border-border/50 text-center min-w-[80px]">
+            <div className="text-2xl font-bold text-status-in-progress">{inProgressCount}</div>
+            <div className="text-xs text-muted-foreground font-medium">In Progress</div>
+          </div>
+          <div className="bg-card rounded-xl px-4 py-2.5 shadow-card border border-border/50 text-center min-w-[80px]">
+            <div className="text-2xl font-bold text-status-rejected">{rejectedCount}</div>
+            <div className="text-xs text-muted-foreground font-medium">Rejected</div>
           </div>
         </div>
       </div>
