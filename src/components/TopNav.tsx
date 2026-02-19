@@ -1,13 +1,24 @@
 import React, { useState } from 'react';
-import { Upload, LayoutDashboard, Settings } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Upload, LayoutDashboard, Lock } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { UploadModal } from './UploadModal';
 import { useAppData } from '../context/AppContext';
+
+const AUTH_KEY = 'hassantuk_auth_unlocked';
 
 export function TopNav() {
   const [uploadOpen, setUploadOpen] = useState(false);
   const { data } = useAppData();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleUploadClick = () => {
+    if (sessionStorage.getItem(AUTH_KEY) === 'true') {
+      setUploadOpen(true);
+    } else {
+      navigate('/settings');
+    }
+  };
 
   return (
     <>
@@ -40,7 +51,7 @@ export function TopNav() {
                 location.pathname === '/settings' ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
               }`}
             >
-              <Settings size={14} />
+              <Lock size={13} />
               Settings
             </Link>
           </div>
@@ -55,9 +66,9 @@ export function TopNav() {
             </div>
           )}
 
-          {/* Upload Button */}
+          {/* Upload Button - requires auth */}
           <button
-            onClick={() => setUploadOpen(true)}
+            onClick={handleUploadClick}
             className="flex items-center gap-2 bg-white/15 hover:bg-white/25 border border-white/20 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
           >
             <Upload size={15} />

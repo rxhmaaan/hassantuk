@@ -8,6 +8,7 @@ import {
   loadPhotosFromStorage,
   readFileAsDataUrl,
   photoFileToKey,
+  loadDefaultExcelData,
 } from '../utils/dataUtils';
 
 interface AppContextType {
@@ -27,11 +28,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    const savedData = loadDataFromStorage();
-    const savedPhotos = loadPhotosFromStorage();
-    if (savedData) setData(savedData);
-    if (savedPhotos) setPhotos(savedPhotos);
-    setIsLoaded(true);
+    const init = async () => {
+      const savedPhotos = loadPhotosFromStorage();
+      if (savedPhotos) setPhotos(savedPhotos);
+
+      // Try localStorage first; if empty, load the bundled default Excel
+      const savedData = loadDataFromStorage();
+      if (savedData && savedData.length > 0) {
+        setData(savedData);
+      } else {
+        const defaultData = await loadDefaultExcelData();
+        if (defaultData.length > 0) {
+          setData(defaultData);
+          saveDataToStorage(defaultData);
+        }
+      }
+      setIsLoaded(true);
+    };
+    init();
   }, []);
 
   const uploadFiles = useCallback(async (excelFile: File | null, photoFiles: File[], photoKeyOverride?: string) => {
@@ -47,19 +61,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const newPhotos: Record<string, string> = {};
         for (let i = 0; i < photoFiles.length; i++) {
           const file = photoFiles[i];
-          // If a single file is uploaded with an override key (from Settings page), use that key
           const key = (photoKeyOverride && photoFiles.length === 1) ? photoKeyOverride : photoFileToKey(file.name);
           const dataUrl = await readFileAsDataUrl(file);
           newPhotos[key] = dataUrl;
         }
-        const merged = { ...photos, ...newPhotos };
-        setPhotos(merged);
-        savePhotosToStorage(newPhotos);
+        setPhotos((prev) => {
+          const merged = { ...prev, ...newPhotos };
+          savePhotosToStorage(newPhotos);
+          return merged;
+        });
       }
     } finally {
       setUploading(false);
     }
-  }, [photos]);
+  }, []);
 
   return (
     <AppContext.Provider value={{ data, photos, isLoaded, uploadFiles, uploading }}>

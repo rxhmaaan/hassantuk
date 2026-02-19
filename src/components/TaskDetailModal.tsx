@@ -8,13 +8,13 @@ interface TaskDetailModalProps {
 }
 
 const STATUS_BADGE: Record<string, string> = {
-  'Done': 'bg-green-100 text-green-800 border-green-200',
-  'Pending': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  'Rjected': 'bg-red-100 text-red-800 border-red-200',
-  'In Progress': 'bg-blue-100 text-blue-800 border-blue-200',
-  'Partially Done': 'bg-orange-100 text-orange-800 border-orange-200',
-  'NA': 'bg-gray-100 text-gray-600 border-gray-200',
-  '': 'bg-gray-100 text-gray-600 border-gray-200',
+  'Done': 'bg-status-done/15 text-status-done border-status-done/30',
+  'Pending': 'bg-status-pending/15 text-status-pending border-status-pending/30',
+  'Rejected': 'bg-status-rejected/15 text-status-rejected border-status-rejected/30',
+  'In Progress': 'bg-status-in-progress/15 text-status-in-progress border-status-in-progress/30',
+  'Partially Done': 'bg-status-partially-done/15 text-status-partially-done border-status-partially-done/30',
+  'NA': 'bg-muted text-muted-foreground border-border',
+  '': 'bg-muted text-muted-foreground border-border',
 };
 
 const PRIORITY_BADGE: Record<string, string> = {
@@ -69,7 +69,7 @@ export function TaskDetailModal({ task, onClose }: TaskDetailModalProps) {
           {/* Status Badge */}
           <div className="mb-4">
             <span className={`inline-flex items-center text-sm font-semibold px-3 py-1 rounded-full border ${STATUS_BADGE[task.update] || STATUS_BADGE['']}`}>
-              {statusLabel === 'Rjected' ? 'Rejected' : statusLabel}
+              {statusLabel}
             </span>
           </div>
 

@@ -3,9 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAppData } from '../context/AppContext';
 import { OWNERS, ALL_STATUSES } from '../types/actionPlan';
 import { TasksTable } from '../components/TasksTable';
-import { FilterPanel } from '../components/FilterPanel';
-import { DashboardCharts } from '../components/DashboardCharts';
-import { ArrowLeft, User, CheckCircle2, Clock, BarChart3 } from 'lucide-react';
+import { ArrowLeft, User, ChevronDown } from 'lucide-react';
 
 function parseDate(dateStr: string): Date | null {
   if (!dateStr || dateStr === 'TBD' || dateStr === 'NA') return null;
@@ -27,10 +25,7 @@ export default function OwnerDetail() {
   const ownerInfo = OWNERS.find((o) => o.name === decodedName);
 
   const ownerTasks = useMemo(() => {
-    return data.filter((item) => {
-      const firstName = decodedName.split(' ')[0].toLowerCase();
-      return item.dashboardOwner.toLowerCase().includes(firstName) || item.dashboardOwner === decodedName;
-    });
+    return data.filter((item) => item.dashboardOwner === decodedName);
   }, [data, decodedName]);
 
   const filteredTasks = useMemo(() => {
@@ -48,26 +43,21 @@ export default function OwnerDetail() {
   }, [ownerTasks, selectedStatus, dateFrom, dateTo]);
 
   const done = ownerTasks.filter((t) => t.update === 'Done').length;
-  const pending = ownerTasks.length - done;
+  const pending = ownerTasks.filter((t) => t.update === 'Pending').length;
+  const inProgress = ownerTasks.filter((t) => t.update === 'In Progress').length;
+  const rejected = ownerTasks.filter((t) => t.update === 'Rejected').length;
+  const partiallyDone = ownerTasks.filter((t) => t.update === 'Partially Done').length;
   const photo = ownerInfo ? photos[ownerInfo.photoKey] : null;
 
-  // Status breakdown
-  const statusBreakdown = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const t of ownerTasks) {
-      const s = t.update || '—';
-      counts[s] = (counts[s] || 0) + 1;
-    }
-    return counts;
-  }, [ownerTasks]);
-
   const STATUS_COLORS_MAP: Record<string, string> = {
-    'Done': 'text-status-done',
-    'Pending': 'text-status-pending',
-    'Rjected': 'text-status-rejected',
-    'In Progress': 'text-status-in-progress',
-    'Partially Done': 'text-status-partially-done',
+    'Done': 'text-status-done bg-status-done/10',
+    'Pending': 'text-status-pending bg-status-pending/10',
+    'Rejected': 'text-status-rejected bg-status-rejected/10',
+    'In Progress': 'text-status-in-progress bg-status-in-progress/10',
+    'Partially Done': 'text-status-partially-done bg-status-partially-done/10',
   };
+
+  const hasFilters = selectedStatus || dateFrom || dateTo;
 
   return (
     <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
@@ -97,57 +87,99 @@ export default function OwnerDetail() {
               {ownerInfo && (
                 <p className="text-white/70 text-sm italic mt-0.5">{ownerInfo.designation}</p>
               )}
-              <div className="flex items-center gap-4 mt-3">
+              <div className="flex items-center gap-4 mt-3 flex-wrap">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-white">{ownerTasks.length}</div>
                   <div className="text-xs text-white/60">Total</div>
                 </div>
                 <div className="w-px h-8 bg-white/20" />
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary-foreground/90">{done}</div>
-                  <div className="text-xs text-primary-foreground/60">Done</div>
+                  <div className="text-2xl font-bold text-status-done">{done}</div>
+                  <div className="text-xs text-white/60">Done</div>
                 </div>
                 <div className="w-px h-8 bg-white/20" />
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary-foreground/80">{pending}</div>
-                  <div className="text-xs text-primary-foreground/60">Pending</div>
+                  <div className="text-2xl font-bold text-status-pending">{pending}</div>
+                  <div className="text-xs text-white/60">Pending</div>
                 </div>
+                {inProgress > 0 && (
+                  <>
+                    <div className="w-px h-8 bg-white/20" />
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-status-in-progress">{inProgress}</div>
+                      <div className="text-xs text-white/60">In Progress</div>
+                    </div>
+                  </>
+                )}
+                {rejected > 0 && (
+                  <>
+                    <div className="w-px h-8 bg-white/20" />
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-status-rejected">{rejected}</div>
+                      <div className="text-xs text-white/60">Rejected</div>
+                    </div>
+                  </>
+                )}
+                {partiallyDone > 0 && (
+                  <>
+                    <div className="w-px h-8 bg-white/20" />
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-status-partially-done">{partiallyDone}</div>
+                      <div className="text-xs text-white/60">Partially Done</div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
         </div>
-
-        {/* Status Breakdown */}
-        <div className="px-6 py-4 flex flex-wrap gap-4">
-          {Object.entries(statusBreakdown).map(([status, count]) => (
-            <div key={status} className="flex items-center gap-2">
-              <span className={`text-sm font-bold ${STATUS_COLORS_MAP[status] || 'text-muted-foreground'}`}>{count}</span>
-              <span className="text-xs text-muted-foreground">{status === 'Rjected' ? 'Rejected' : status || '—'}</span>
-            </div>
-          ))}
-        </div>
       </div>
 
-      {/* Filters (no owner filter on detail page) */}
-      <FilterPanel
-        selectedOwner={decodedName}
-        setSelectedOwner={() => {}}
-        selectedStatus={selectedStatus}
-        setSelectedStatus={setSelectedStatus}
-        dateFrom={dateFrom}
-        setDateFrom={setDateFrom}
-        dateTo={dateTo}
-        setDateTo={setDateTo}
-      />
-
-      {/* Charts for this owner */}
-      <section>
-        <h2 className="text-base font-semibold text-foreground flex items-center gap-2 mb-3">
-          <BarChart3 size={17} className="text-primary" />
-          Analytics
-        </h2>
-        <DashboardCharts filteredData={filteredTasks} />
-      </section>
+      {/* Simple Filter Bar */}
+      <div className="bg-card rounded-2xl shadow-card p-4 border border-border/50 flex flex-wrap gap-3 items-end">
+        <div>
+          <label className="text-xs font-medium text-muted-foreground block mb-1">Status</label>
+          <div className="relative">
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="appearance-none bg-muted/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground pr-8 focus:outline-none focus:ring-2 focus:ring-primary/30"
+            >
+              <option value="">All Status</option>
+              {ALL_STATUSES.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+            <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs font-medium text-muted-foreground block mb-1">Due Date From</label>
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className="bg-muted/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-muted-foreground block mb-1">Due Date To</label>
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className="bg-muted/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
+        </div>
+        {hasFilters && (
+          <button
+            onClick={() => { setSelectedStatus(''); setDateFrom(''); setDateTo(''); }}
+            className="text-xs text-muted-foreground hover:text-foreground px-3 py-2 rounded-lg border border-border bg-muted/30"
+          >
+            Clear
+          </button>
+        )}
+      </div>
 
       {/* Tasks Table */}
       <section>
