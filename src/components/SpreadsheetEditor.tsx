@@ -26,7 +26,7 @@ interface CellRef {
 }
 
 export default function SpreadsheetEditor() {
-  const { data, updateTask, deleteTask } = useAppData();
+  const { data, updateTask, addTask, deleteTask } = useAppData();
   const [editingCell, setEditingCell] = useState<CellRef | null>(null);
   const [editValue, setEditValue] = useState('');
   const [search, setSearch] = useState('');
