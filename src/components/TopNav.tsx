@@ -8,9 +8,15 @@ const AUTH_KEY = 'hassantuk_auth_unlocked';
 
 export function TopNav() {
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark');
   const { data, brandingConfig } = useAppData();
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark);
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
+  }, [dark]);
 
   const handleUploadClick = () => {
     if (sessionStorage.getItem(AUTH_KEY) === 'true') {
