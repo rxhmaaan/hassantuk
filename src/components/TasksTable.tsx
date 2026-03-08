@@ -43,6 +43,21 @@ export function TasksTable({ tasks, pageSize = 50 }: TasksTableProps) {
 
   return (
     <>
+      <div className="relative mb-3">
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          placeholder="Search tasks across all columns…"
+          className="w-full bg-card border border-border rounded-xl pl-9 pr-9 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+        />
+        {search && (
+          <button onClick={() => { setSearch(''); setPage(1); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+            <X size={14} />
+          </button>
+        )}
+      </div>
       <div className="bg-card rounded-2xl shadow-card overflow-hidden border border-border/50">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
