@@ -62,7 +62,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (savedDashConfig) setDashboardConfigState(savedDashConfig);
 
       const savedData = loadDataFromStorage();
-      if (savedData && savedData.length > 0) {
+      // Check if saved data has new schema (summary field) - if not, reload from Excel
+      const hasNewSchema = savedData && savedData.length > 0 && 'summary' in savedData[0];
+      if (savedData && savedData.length > 0 && hasNewSchema) {
         setData(savedData);
       } else {
         const defaultData = await loadDefaultExcelData();
