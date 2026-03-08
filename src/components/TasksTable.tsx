@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ActionItem } from '../types/actionPlan';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
 import { TaskDetailModal } from './TaskDetailModal';
 
 interface TasksTableProps {
@@ -26,14 +26,38 @@ const PRIORITY_BADGE: Record<string, string> = {
 export function TasksTable({ tasks, pageSize = 50 }: TasksTableProps) {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<ActionItem | null>(null);
+  const [search, setSearch] = useState('');
 
-  const totalPages = Math.max(1, Math.ceil(tasks.length / pageSize));
-  const paginated = tasks.slice((page - 1) * pageSize, page * pageSize);
+  const filtered = useMemo(() => {
+    if (!search.trim()) return tasks;
+    const q = search.toLowerCase();
+    return tasks.filter((t) =>
+      Object.values(t).some((v) => String(v).toLowerCase().includes(q))
+    );
+  }, [tasks, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const badge = (status: string) => STATUS_BADGE[status] || STATUS_BADGE[''];
 
   return (
     <>
+      <div className="relative mb-3">
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          placeholder="Search tasks across all columns…"
+          className="w-full bg-card border border-border rounded-xl pl-9 pr-9 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+        />
+        {search && (
+          <button onClick={() => { setSearch(''); setPage(1); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+            <X size={14} />
+          </button>
+        )}
+      </div>
       <div className="bg-card rounded-2xl shadow-card overflow-hidden border border-border/50">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -99,7 +123,7 @@ export function TasksTable({ tasks, pageSize = 50 }: TasksTableProps) {
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-muted/20">
             <p className="text-xs text-muted-foreground">
-              {tasks.length} tasks · Page {page} of {totalPages}
+              {filtered.length} tasks · Page {page} of {totalPages}
             </p>
             <div className="flex items-center gap-1">
               <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded-lg hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
