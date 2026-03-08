@@ -69,6 +69,22 @@ export default function Index() {
           </p>
         </div>
 
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-medium px-4 py-2 rounded-lg text-sm hover:bg-primary/90 transition-colors shadow-sm">
+              <Download size={16} /> Export
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => exportToExcel(data, dashboardConfig.title)}>
+              <FileSpreadsheet size={15} className="mr-2 text-green-600" /> Export as Excel
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportToPDF(data, dashboardConfig.title)}>
+              <FileText size={15} className="mr-2 text-red-500" /> Export as PDF
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         {layoutConfig.showKpiBoxes && (
           <div className={kpiStyleClass}>
             {kpiItems.map((kpi) => (
