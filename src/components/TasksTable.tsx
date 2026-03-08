@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ActionItem } from '../types/actionPlan';
-import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, X, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { TaskDetailModal } from './TaskDetailModal';
 
 interface TasksTableProps {
@@ -23,10 +23,35 @@ const PRIORITY_BADGE: Record<string, string> = {
   'P2': 'bg-blue-50 text-blue-700 border border-blue-200',
 };
 
+type SortKey = 'plannedActions' | 'dashboardOwner' | 'update' | 'ecd' | 'priority' | 'remarks';
+type SortDir = 'asc' | 'desc';
+
+function compareValues(a: string, b: string, key: SortKey): number {
+  if (key === 'ecd') {
+    const da = a && a !== 'TBD' && a !== 'NA' ? new Date(a).getTime() : Infinity;
+    const db = b && b !== 'TBD' && b !== 'NA' ? new Date(b).getTime() : Infinity;
+    return da - db;
+  }
+  return (a || '').localeCompare(b || '', undefined, { sensitivity: 'base' });
+}
+
 export function TasksTable({ tasks, pageSize = 50 }: TasksTableProps) {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<ActionItem | null>(null);
   const [search, setSearch] = useState('');
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      if (sortDir === 'asc') setSortDir('desc');
+      else { setSortKey(null); setSortDir('asc'); }
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+    setPage(1);
+  };
 
   const filtered = useMemo(() => {
     if (!search.trim()) return tasks;
@@ -36,10 +61,29 @@ export function TasksTable({ tasks, pageSize = 50 }: TasksTableProps) {
     );
   }, [tasks, search]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
+  const sorted = useMemo(() => {
+    if (!sortKey) return filtered;
+    const arr = [...filtered];
+    arr.sort((a, b) => {
+      const va = String(a[sortKey] || '');
+      const vb = String(b[sortKey] || '');
+      const cmp = compareValues(va, vb, sortKey);
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    return arr;
+  }, [filtered, sortKey, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
+  const paginated = sorted.slice((page - 1) * pageSize, page * pageSize);
 
   const badge = (status: string) => STATUS_BADGE[status] || STATUS_BADGE[''];
+
+  const SortIcon = ({ col }: { col: SortKey }) => {
+    if (sortKey !== col) return <ArrowUpDown size={12} className="text-muted-foreground/50" />;
+    return sortDir === 'asc' ? <ArrowUp size={12} className="text-primary" /> : <ArrowDown size={12} className="text-primary" />;
+  };
+
+  const thClass = "text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide bg-muted/30 cursor-pointer select-none hover:text-foreground transition-colors";
 
   return (
     <>
@@ -64,12 +108,24 @@ export function TasksTable({ tasks, pageSize = 50 }: TasksTableProps) {
             <thead>
               <tr className="border-b border-border">
                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide bg-muted/30 w-8">#</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide bg-muted/30 min-w-[280px]">Planned Action</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide bg-muted/30">Dashboard Owner</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide bg-muted/30">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide bg-muted/30">ECD</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide bg-muted/30">Priority</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide bg-muted/30 hidden xl:table-cell">Remarks</th>
+                <th className={`${thClass} min-w-[280px]`} onClick={() => handleSort('plannedActions')}>
+                  <span className="inline-flex items-center gap-1">Planned Action <SortIcon col="plannedActions" /></span>
+                </th>
+                <th className={thClass} onClick={() => handleSort('dashboardOwner')}>
+                  <span className="inline-flex items-center gap-1">Dashboard Owner <SortIcon col="dashboardOwner" /></span>
+                </th>
+                <th className={thClass} onClick={() => handleSort('update')}>
+                  <span className="inline-flex items-center gap-1">Status <SortIcon col="update" /></span>
+                </th>
+                <th className={thClass} onClick={() => handleSort('ecd')}>
+                  <span className="inline-flex items-center gap-1">ECD <SortIcon col="ecd" /></span>
+                </th>
+                <th className={thClass} onClick={() => handleSort('priority')}>
+                  <span className="inline-flex items-center gap-1">Priority <SortIcon col="priority" /></span>
+                </th>
+                <th className={`${thClass} hidden xl:table-cell`} onClick={() => handleSort('remarks')}>
+                  <span className="inline-flex items-center gap-1">Remarks <SortIcon col="remarks" /></span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -123,7 +179,7 @@ export function TasksTable({ tasks, pageSize = 50 }: TasksTableProps) {
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-muted/20">
             <p className="text-xs text-muted-foreground">
-              {filtered.length} tasks · Page {page} of {totalPages}
+              {sorted.length} tasks · Page {page} of {totalPages}
             </p>
             <div className="flex items-center gap-1">
               <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded-lg hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
