@@ -14,7 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      action_items: {
+        Row: {
+          area_of_improvement: string
+          challenge_category: string
+          created_at: string
+          dashboard_owner: string
+          ecd: string
+          id: number
+          planned_actions: string
+          priority: string
+          remarks: string
+          stream_owner: string
+          summary: string
+          task_supporters: string
+          update_status: string
+          updated_at: string
+        }
+        Insert: {
+          area_of_improvement?: string
+          challenge_category?: string
+          created_at?: string
+          dashboard_owner?: string
+          ecd?: string
+          id?: number
+          planned_actions?: string
+          priority?: string
+          remarks?: string
+          stream_owner?: string
+          summary?: string
+          task_supporters?: string
+          update_status?: string
+          updated_at?: string
+        }
+        Update: {
+          area_of_improvement?: string
+          challenge_category?: string
+          created_at?: string
+          dashboard_owner?: string
+          ecd?: string
+          id?: number
+          planned_actions?: string
+          priority?: string
+          remarks?: string
+          stream_owner?: string
+          summary?: string
+          task_supporters?: string
+          update_status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      owner_photos: {
+        Row: {
+          data_url: string
+          photo_key: string
+          updated_at: string
+        }
+        Insert: {
+          data_url: string
+          photo_key: string
+          updated_at?: string
+        }
+        Update: {
+          data_url?: string
+          photo_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
