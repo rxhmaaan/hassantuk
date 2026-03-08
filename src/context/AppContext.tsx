@@ -83,6 +83,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     // Apply status colors from config
     statusConfig.forEach((sc) => {
+      if (!sc?.key || !sc?.color) return;
       const cssKey = sc.key.toLowerCase().replace(/\s+/g, '-');
       root.style.setProperty(`--status-${cssKey}`, sc.color);
     });
