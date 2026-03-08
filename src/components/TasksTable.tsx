@@ -123,7 +123,7 @@ export function TasksTable({ tasks, pageSize = 50 }: TasksTableProps) {
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-muted/20">
             <p className="text-xs text-muted-foreground">
-              {tasks.length} tasks · Page {page} of {totalPages}
+              {filtered.length} tasks · Page {page} of {totalPages}
             </p>
             <div className="flex items-center gap-1">
               <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded-lg hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
