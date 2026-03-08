@@ -90,35 +90,62 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const init = async () => {
-      const savedPhotos = loadPhotosFromStorage();
-      if (savedPhotos) setPhotos(savedPhotos);
-      const savedOwners = loadOwnersConfig();
-      if (savedOwners) setOwnersState(savedOwners);
-      const savedColumns = loadColumnsConfig();
-      if (savedColumns) setColumnsState(savedColumns);
-      const savedDashConfig = loadDashboardConfig();
-      if (savedDashConfig) setDashboardConfigState(savedDashConfig);
-      const savedTheme = loadThemeConfig();
-      if (savedTheme) setThemeConfigState(savedTheme);
-      const savedLayout = loadLayoutConfig();
-      if (savedLayout) setLayoutConfigState(savedLayout);
-      const savedBranding = loadBrandingConfig();
-      if (savedBranding) setBrandingConfigState(savedBranding);
-      const savedStatusCfg = loadStatusConfig();
-      if (savedStatusCfg) setStatusConfigState(savedStatusCfg);
-      const savedKpi = loadKpiConfig();
-      if (savedKpi) setKpiConfigState(savedKpi);
+      try {
+        const savedPhotos = loadPhotosFromStorage();
+        if (savedPhotos && typeof savedPhotos === 'object') setPhotos(savedPhotos);
 
-      const savedData = loadDataFromStorage();
-      const hasNewSchema = savedData && savedData.length > 0 && 'summary' in savedData[0];
-      if (savedData && savedData.length > 0 && hasNewSchema) {
-        setData(savedData);
-      } else {
-        const defaultData = await loadDefaultExcelData();
-        if (defaultData.length > 0) { setData(defaultData); saveDataToStorage(defaultData); }
+        const savedOwners = loadOwnersConfig();
+        if (Array.isArray(savedOwners)) setOwnersState(savedOwners);
+
+        const savedColumns = loadColumnsConfig();
+        if (Array.isArray(savedColumns)) setColumnsState(savedColumns);
+
+        const savedDashConfig = loadDashboardConfig();
+        if (savedDashConfig && typeof savedDashConfig === 'object') setDashboardConfigState(savedDashConfig);
+
+        const savedTheme = loadThemeConfig();
+        if (savedTheme && typeof savedTheme === 'object') setThemeConfigState(savedTheme);
+
+        const savedLayout = loadLayoutConfig();
+        if (savedLayout && typeof savedLayout === 'object') setLayoutConfigState(savedLayout);
+
+        const savedBranding = loadBrandingConfig();
+        if (savedBranding && typeof savedBranding === 'object') setBrandingConfigState(savedBranding);
+
+        const savedStatusCfg = loadStatusConfig();
+        const safeStatusCfg = Array.isArray(savedStatusCfg)
+          ? savedStatusCfg.filter(
+              (sc): sc is StatusConfig =>
+                Boolean(sc) &&
+                typeof sc === 'object' &&
+                typeof sc.key === 'string' &&
+                typeof sc.color === 'string' &&
+                typeof sc.label === 'string'
+            )
+          : null;
+        if (safeStatusCfg && safeStatusCfg.length > 0) setStatusConfigState(safeStatusCfg);
+
+        const savedKpi = loadKpiConfig();
+        if (savedKpi && typeof savedKpi === 'object') setKpiConfigState(savedKpi);
+
+        const savedData = loadDataFromStorage();
+        const hasNewSchema = savedData && savedData.length > 0 && 'summary' in savedData[0];
+        if (savedData && savedData.length > 0 && hasNewSchema) {
+          setData(savedData);
+        } else {
+          const defaultData = await loadDefaultExcelData();
+          if (defaultData.length > 0) {
+            setData(defaultData);
+            saveDataToStorage(defaultData);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to initialize app state, falling back to defaults:', error);
+      } finally {
+        setIsLoaded(true);
       }
-      setIsLoaded(true);
     };
+
     init();
   }, []);
 
