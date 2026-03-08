@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { useAppData } from '../context/AppContext';
 import { OwnerCards } from '../components/OwnerCards';
 import { TasksTable } from '../components/TasksTable';
-import { Upload, Users } from 'lucide-react';
+import { Upload, Users, Download, FileSpreadsheet, FileText } from 'lucide-react';
 import { UploadModal } from '../components/UploadModal';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
+import { exportToExcel, exportToPDF } from '../utils/exportUtils';
 
 export default function Index() {
   const { data, isLoaded, dashboardConfig, layoutConfig, kpiConfig } = useAppData();
