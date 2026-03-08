@@ -185,6 +185,16 @@ export async function loadDefaultExcelData(): Promise<ActionItem[]> {
   }
 }
 
-export function clearAllData() {
+export async function clearAllData() {
+  // Clear localStorage (legacy)
   [STORAGE_KEY, PHOTOS_KEY, OWNERS_KEY, COLUMNS_KEY, DASHBOARD_KEY, THEME_KEY, LAYOUT_KEY, BRANDING_KEY, STATUS_CFG_KEY, KPI_KEY].forEach(k => localStorage.removeItem(k));
+  // Clear DB
+  try {
+    const { supabase } = await import('../integrations/supabase/client');
+    await supabase.from('action_items').delete().gte('id', 0);
+    await supabase.from('app_settings').delete().neq('key', '');
+    await supabase.from('owner_photos').delete().neq('photo_key', '');
+  } catch (e) {
+    console.error('Failed to clear DB data:', e);
+  }
 }
