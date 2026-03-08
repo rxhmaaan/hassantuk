@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useAppData } from '../context/AppContext';
-import { ActionItem, ALL_STATUSES, OWNERS, STATUS_COLORS } from '../types/actionPlan';
-import { Filter, ChevronDown, Calendar, X } from 'lucide-react';
+import { ActionItem, ALL_STATUSES } from '../types/actionPlan';
+import { Filter, ChevronDown, X } from 'lucide-react';
 
 interface FilterPanelProps {
   selectedOwner: string;
@@ -14,20 +14,13 @@ interface FilterPanelProps {
   setDateTo: (v: string) => void;
 }
 
-const STATUS_DOT: Record<string, string> = {
-  'Done': 'bg-status-done',
-  'Pending': 'bg-status-pending',
-  'Rjected': 'bg-status-rejected',
-  'In Progress': 'bg-status-in-progress',
-  'Partially Done': 'bg-status-partially-done',
-};
-
 export function FilterPanel({
   selectedOwner, setSelectedOwner,
   selectedStatus, setSelectedStatus,
   dateFrom, setDateFrom,
   dateTo, setDateTo,
 }: FilterPanelProps) {
+  const { owners } = useAppData();
   const hasFilters = selectedOwner || selectedStatus || dateFrom || dateTo;
 
   const clearAll = () => {
@@ -52,7 +45,6 @@ export function FilterPanel({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {/* Dashboard Owner */}
         <div>
           <label className="text-xs font-medium text-muted-foreground block mb-1">Dashboard Owner</label>
           <div className="relative">
@@ -62,7 +54,7 @@ export function FilterPanel({
               className="w-full appearance-none bg-muted/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground pr-8 focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
               <option value="">All Owners</option>
-              {OWNERS.map((o) => (
+              {owners.map((o) => (
                 <option key={o.name} value={o.name}>{o.name}</option>
               ))}
             </select>
@@ -70,7 +62,6 @@ export function FilterPanel({
           </div>
         </div>
 
-        {/* Status */}
         <div>
           <label className="text-xs font-medium text-muted-foreground block mb-1">Status</label>
           <div className="relative">
@@ -81,37 +72,31 @@ export function FilterPanel({
             >
               <option value="">All Status</option>
               {ALL_STATUSES.map((s) => (
-                <option key={s} value={s}>{s === 'Rjected' ? 'Rejected' : s}</option>
+                <option key={s} value={s}>{s}</option>
               ))}
             </select>
             <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           </div>
         </div>
 
-        {/* Date From */}
         <div>
           <label className="text-xs font-medium text-muted-foreground block mb-1">Due Date From</label>
-          <div className="relative">
-            <input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-            />
-          </div>
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
         </div>
 
-        {/* Date To */}
         <div>
           <label className="text-xs font-medium text-muted-foreground block mb-1">Due Date To</label>
-          <div className="relative">
-            <input
-              type="date"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-            />
-          </div>
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
         </div>
       </div>
     </div>
