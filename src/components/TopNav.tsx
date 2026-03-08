@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Upload, LayoutDashboard, Lock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Upload, LayoutDashboard, Lock, Moon, Sun } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { UploadModal } from './UploadModal';
 import { useAppData } from '../context/AppContext';
@@ -8,9 +8,15 @@ const AUTH_KEY = 'hassantuk_auth_unlocked';
 
 export function TopNav() {
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark');
   const { data, brandingConfig } = useAppData();
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark);
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
+  }, [dark]);
 
   const handleUploadClick = () => {
     if (sessionStorage.getItem(AUTH_KEY) === 'true') {
@@ -55,6 +61,10 @@ export function TopNav() {
               {data.length} tasks loaded
             </div>
           )}
+
+          <button onClick={() => setDark(!dark)} className="flex items-center justify-center w-9 h-9 rounded-lg bg-white/15 hover:bg-white/25 border border-white/20 text-white transition-colors" aria-label="Toggle dark mode">
+            {dark ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
 
           <button onClick={handleUploadClick} className="flex items-center gap-2 bg-white/15 hover:bg-white/25 border border-white/20 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
             <Upload size={15} />
