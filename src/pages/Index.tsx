@@ -77,10 +77,10 @@ export default function Index() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => exportToExcel(data, dashboardConfig.title)}>
-              <FileSpreadsheet size={15} className="mr-2 text-green-600" /> Export as Excel
+              <FileSpreadsheet size={15} className="mr-2 text-primary" /> Export as Excel
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => exportToPDF(data, dashboardConfig.title)}>
-              <FileText size={15} className="mr-2 text-red-500" /> Export as PDF
+              <FileText size={15} className="mr-2 text-destructive" /> Export as PDF
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
