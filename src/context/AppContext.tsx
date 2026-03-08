@@ -189,6 +189,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const updateTask = useCallback((id: number, updates: Partial<ActionItem>) => {
     setData((prev) => { const u = prev.map((item) => item.id === id ? { ...item, ...updates } : item); saveDataToStorage(u); return u; });
   }, []);
+  const addTask = useCallback((task: ActionItem) => {
+    setData((prev) => { const u = [...prev, task]; saveDataToStorage(u); return u; });
+  }, []);
   const deleteTask = useCallback((id: number) => {
     setData((prev) => { const u = prev.filter((item) => item.id !== id); saveDataToStorage(u); return u; });
   }, []);
