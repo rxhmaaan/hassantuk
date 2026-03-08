@@ -26,9 +26,18 @@ const PRIORITY_BADGE: Record<string, string> = {
 export function TasksTable({ tasks, pageSize = 50 }: TasksTableProps) {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<ActionItem | null>(null);
+  const [search, setSearch] = useState('');
 
-  const totalPages = Math.max(1, Math.ceil(tasks.length / pageSize));
-  const paginated = tasks.slice((page - 1) * pageSize, page * pageSize);
+  const filtered = useMemo(() => {
+    if (!search.trim()) return tasks;
+    const q = search.toLowerCase();
+    return tasks.filter((t) =>
+      Object.values(t).some((v) => String(v).toLowerCase().includes(q))
+    );
+  }, [tasks, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const badge = (status: string) => STATUS_BADGE[status] || STATUS_BADGE[''];
 
