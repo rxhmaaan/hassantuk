@@ -126,9 +126,7 @@ export default function SpreadsheetEditor() {
       update: '',
       remarks: '',
     };
-    // Use updateTask won't work for new items, we need addTask
-    // For now we'll use the context - but we need to add this
-    updateTask(newTask.id, newTask);
+    addTask(newTask);
   };
 
   const renderCell = (task: ActionItem, colIdx: number, rowIdx: number) => {
