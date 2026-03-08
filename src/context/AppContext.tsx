@@ -38,6 +38,7 @@ interface AppContextType {
   kpiConfig: KpiConfig;
   setKpiConfig: (v: KpiConfig) => void;
   updateTask: (id: number, updates: Partial<ActionItem>) => void;
+  addTask: (task: ActionItem) => void;
   deleteTask: (id: number) => void;
   clearData: () => void;
 }
@@ -188,6 +189,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const updateTask = useCallback((id: number, updates: Partial<ActionItem>) => {
     setData((prev) => { const u = prev.map((item) => item.id === id ? { ...item, ...updates } : item); saveDataToStorage(u); return u; });
   }, []);
+  const addTask = useCallback((task: ActionItem) => {
+    setData((prev) => { const u = [...prev, task]; saveDataToStorage(u); return u; });
+  }, []);
   const deleteTask = useCallback((id: number) => {
     setData((prev) => { const u = prev.filter((item) => item.id !== id); saveDataToStorage(u); return u; });
   }, []);
@@ -203,7 +207,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       brandingConfig, setBrandingConfig,
       statusConfig, setStatusConfig,
       kpiConfig, setKpiConfig,
-      updateTask, deleteTask, clearData,
+      updateTask, addTask, deleteTask, clearData,
     }}>
       {children}
     </AppContext.Provider>
