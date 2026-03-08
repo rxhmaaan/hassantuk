@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Upload, LayoutDashboard, Lock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Upload, LayoutDashboard, Lock, Moon, Sun } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { UploadModal } from './UploadModal';
 import { useAppData } from '../context/AppContext';

@@ -67,6 +67,50 @@
     --shadow-card: 0 2px 8px rgba(120, 20, 20, 0.08), 0 0 0 1px rgba(120, 20, 20, 0.05);
     --shadow-card-hover: 0 8px 24px rgba(120, 20, 20, 0.15), 0 0 0 1px rgba(120, 20, 20, 0.1);
   }
+
+  .dark {
+    --background: 0 10% 10%;
+    --foreground: 0 5% 90%;
+
+    --card: 0 10% 14%;
+    --card-foreground: 0 5% 90%;
+
+    --popover: 0 10% 14%;
+    --popover-foreground: 0 5% 90%;
+
+    --primary: 0 72% 42%;
+    --primary-foreground: 0 0% 98%;
+
+    --primary-light: 0 72% 52%;
+    --primary-dark: 0 72% 30%;
+
+    --secondary: 0 12% 22%;
+    --secondary-foreground: 0 0% 90%;
+
+    --muted: 0 8% 18%;
+    --muted-foreground: 0 5% 60%;
+
+    --accent: 0 8% 18%;
+    --accent-foreground: 0 5% 90%;
+
+    --destructive: 0 84% 55%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 8% 20%;
+    --input: 0 8% 20%;
+    --ring: 0 72% 42%;
+
+    --sidebar-background: 0 72% 10%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-accent: 0 72% 18%;
+    --sidebar-border: 0 72% 18%;
+    --sidebar-ring: 0 72% 55%;
+
+    --gradient-hero: linear-gradient(135deg, hsl(0 72% 12%), hsl(0 72% 28%));
+    --gradient-card: linear-gradient(180deg, hsl(0 10% 14%), hsl(0 10% 10%));
+    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
 }
 
 @layer base {
