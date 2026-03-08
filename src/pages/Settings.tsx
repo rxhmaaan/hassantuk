@@ -470,6 +470,34 @@ export default function Settings() {
           <div className="bg-card rounded-2xl shadow-card border border-border/50 overflow-hidden">
             <SectionHeader icon={Database} title="Data Management" desc="Upload new data or reset everything" />
             <div className="px-6 py-5 space-y-5">
+              {/* Upload Section */}
+              <div className="bg-primary/5 rounded-xl p-4 border border-primary/20">
+                <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2"><Upload size={15} className="text-primary" /> Upload Excel File</h3>
+                <p className="text-xs text-muted-foreground mb-3">Upload a new .xlsx file to replace all current task data.</p>
+                <div className="flex items-center gap-3">
+                  <input
+                    ref={(el) => { fileRefs.current['excel-upload'] = el; }}
+                    type="file"
+                    accept=".xlsx,.xls"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const f = e.target.files?.[0];
+                      if (f) {
+                        await uploadFiles(f, []);
+                        if (fileRefs.current['excel-upload']) fileRefs.current['excel-upload'].value = '';
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={() => (fileRefs.current['excel-upload'] as HTMLInputElement)?.click()}
+                    disabled={uploading}
+                    className="flex items-center gap-1.5 gradient-hero text-primary-foreground text-xs font-semibold px-4 py-2.5 rounded-lg hover:opacity-90 disabled:opacity-50"
+                  >
+                    <Upload size={14} /> {uploading ? 'Uploading…' : 'Choose Excel File'}
+                  </button>
+                </div>
+              </div>
+
               <div className="bg-muted/30 rounded-xl p-4 border border-border/50">
                 <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2"><FileText size={15} className="text-primary" /> Current Data</h3>
                 <p className="text-xs text-muted-foreground"><strong>{data.length}</strong> tasks · <strong>{owners.length}</strong> owners · <strong>{columns.filter(c => c.visible).length}</strong> visible columns</p>
