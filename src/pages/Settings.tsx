@@ -507,7 +507,7 @@ export default function Settings() {
                 <p className="text-xs text-muted-foreground mb-3">These actions cannot be undone.</p>
                 <div className="flex flex-wrap gap-3">
                   <button onClick={() => { if (confirm('Clear all task data?')) clearData(); }} className="flex items-center gap-1.5 bg-status-rejected/10 hover:bg-status-rejected/20 text-status-rejected text-xs font-semibold px-4 py-2 rounded-lg border border-status-rejected/30"><Trash2 size={13} /> Clear Tasks</button>
-                  <button onClick={() => { if (confirm('Factory reset everything?')) { clearAllData(); window.location.reload(); } }} className="flex items-center gap-1.5 bg-status-rejected/10 hover:bg-status-rejected/20 text-status-rejected text-xs font-semibold px-4 py-2 rounded-lg border border-status-rejected/30"><RotateCcw size={13} /> Factory Reset</button>
+                  <button onClick={async () => { if (confirm('Factory reset everything?')) { await clearAllData(); window.location.reload(); } }} className="flex items-center gap-1.5 bg-status-rejected/10 hover:bg-status-rejected/20 text-status-rejected text-xs font-semibold px-4 py-2 rounded-lg border border-status-rejected/30"><RotateCcw size={13} /> Factory Reset</button>
                 </div>
               </div>
             </div>
