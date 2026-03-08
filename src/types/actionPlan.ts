@@ -5,8 +5,9 @@ export interface ActionItem {
   streamOwner: string;
   priority: string;
   plannedActions: string;
+  summary: string;
   dashboardOwner: string;
-  owner: string;
+  taskSupporters: string;
   ecd: string;
   update: string;
   remarks: string;
@@ -20,13 +21,14 @@ export interface OwnerInfo {
   photoKey: string;
 }
 
-// Alphabetical order
-export const OWNERS: OwnerInfo[] = [
+// Default owners - admin can customize these
+export const DEFAULT_OWNERS: OwnerInfo[] = [
   { name: 'Ahmed Fathy', designation: 'Service Management', photoKey: 'Ahmed-Fathy' },
   { name: 'Amr Fahmy', designation: 'Field Ops', photoKey: 'Amr-Fahmy' },
   { name: 'Amr Rashwan', designation: 'IoT Ops', photoKey: 'Amr-Rashwan' },
   { name: 'Ashraf Hassan', designation: 'Call Center', photoKey: 'Ashraf-Hassan' },
   { name: 'Azzam', designation: 'IT and Systems', photoKey: 'Azzam' },
+  { name: 'Fadil AlZarouni', designation: 'Management', photoKey: 'Fadil-AlZarouni' },
   { name: 'Hatem Gado', designation: 'Business', photoKey: 'Hatem-Gado' },
 ];
 
@@ -61,3 +63,25 @@ export const STATUS_DISPLAY: Record<string, string> = {
 };
 
 export const ALL_STATUSES = ['Done', 'Pending', 'Rejected', 'In Progress', 'Partially Done'];
+
+// Column definitions for admin configuration
+export interface ColumnConfig {
+  key: keyof ActionItem;
+  label: string;
+  visible: boolean;
+}
+
+export const DEFAULT_COLUMNS: ColumnConfig[] = [
+  { key: 'id', label: '#', visible: true },
+  { key: 'challengeCategory', label: 'Challenge Category', visible: true },
+  { key: 'areaOfImprovement', label: 'Area of Improvement', visible: true },
+  { key: 'streamOwner', label: 'Stream Owner', visible: false },
+  { key: 'priority', label: 'Priority', visible: true },
+  { key: 'plannedActions', label: 'Planned Actions', visible: true },
+  { key: 'summary', label: 'Summary', visible: true },
+  { key: 'dashboardOwner', label: 'Dashboard Owner', visible: true },
+  { key: 'taskSupporters', label: 'Task Supporters', visible: false },
+  { key: 'ecd', label: 'ECD', visible: true },
+  { key: 'update', label: 'Update', visible: true },
+  { key: 'remarks', label: 'Remarks', visible: true },
+];

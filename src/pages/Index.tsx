@@ -1,12 +1,13 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useAppData } from '../context/AppContext';
 import { OwnerCards } from '../components/OwnerCards';
 import { TasksTable } from '../components/TasksTable';
 import { Upload, Users } from 'lucide-react';
 import { UploadModal } from '../components/UploadModal';
+import { useState } from 'react';
 
 export default function Index() {
-  const { data, isLoaded } = useAppData();
+  const { data, isLoaded, dashboardConfig } = useAppData();
   const [uploadOpen, setUploadOpen] = useState(false);
 
   if (!isLoaded) {
@@ -29,12 +30,8 @@ export default function Index() {
             <h2 className="text-lg text-primary font-semibold mb-2">Action Plan Tracker</h2>
             <p className="text-muted-foreground text-sm mb-8 leading-relaxed">
               Upload your Excel spreadsheet and owner photos to activate the dashboard.
-              Your data will persist across all sessions.
             </p>
-            <button
-              onClick={() => setUploadOpen(true)}
-              className="gradient-hero text-primary-foreground font-semibold px-8 py-3 rounded-xl text-sm flex items-center gap-2 mx-auto hover:opacity-90 transition-opacity shadow-lg"
-            >
+            <button onClick={() => setUploadOpen(true)} className="gradient-hero text-primary-foreground font-semibold px-8 py-3 rounded-xl text-sm flex items-center gap-2 mx-auto hover:opacity-90 transition-opacity shadow-lg">
               <Upload size={18} />
               Upload Excel + Owner Photos
             </button>
@@ -45,11 +42,6 @@ export default function Index() {
     );
   }
 
-  // KPI grouping rules:
-  // Completed = Done
-  // Rejected  = Rejected
-  // Pending   = Pending
-  // In Progress = everything else (In Progress, Partially Done, Not yet shared, blank, etc.)
   const completedCount  = data.filter((d) => d.update === 'Done').length;
   const rejectedCount   = data.filter((d) => d.update === 'Rejected').length;
   const pendingCount    = data.filter((d) => d.update === 'Pending').length;
@@ -57,15 +49,13 @@ export default function Index() {
 
   return (
     <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-foreground">Action Plan Dashboard</h1>
+          <h1 className="text-xl font-bold text-foreground">{dashboardConfig.title}</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Hassantuk — 16 Feb 2026 · {data.length} total tasks
+            {dashboardConfig.subtitle} — {dashboardConfig.dateLabel} · {data.length} total tasks
           </p>
         </div>
-        {/* Summary KPI Boxes */}
         <div className="flex items-center gap-3 flex-wrap">
           <div className="bg-card rounded-xl px-4 py-2.5 shadow-card border border-border/50 text-center min-w-[80px]">
             <div className="text-2xl font-bold text-primary">{data.length}</div>
@@ -90,7 +80,6 @@ export default function Index() {
         </div>
       </div>
 
-      {/* Owner Cards */}
       <section>
         <h2 className="text-base font-semibold text-foreground flex items-center gap-2 mb-3">
           <Users size={17} className="text-primary" />
@@ -99,7 +88,6 @@ export default function Index() {
         <OwnerCards />
       </section>
 
-      {/* All Tasks Table */}
       <section>
         <h2 className="text-base font-semibold text-foreground mb-3">All Tasks ({data.length})</h2>
         <TasksTable tasks={data} />

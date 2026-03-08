@@ -41,7 +41,7 @@ export function TasksTable({ tasks, pageSize = 50 }: TasksTableProps) {
               <tr className="border-b border-border">
                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide bg-muted/30 w-8">#</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide bg-muted/30 min-w-[280px]">Planned Action</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide bg-muted/30">Owner</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide bg-muted/30">Dashboard Owner</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide bg-muted/30">Status</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide bg-muted/30">ECD</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide bg-muted/30">Priority</th>
@@ -71,7 +71,7 @@ export function TasksTable({ tasks, pageSize = 50 }: TasksTableProps) {
                           <p className="text-xs text-muted-foreground mt-0.5 truncate">{task.areaOfImprovement}</p>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-foreground whitespace-nowrap">{task.owner || '—'}</td>
+                      <td className="px-4 py-3 text-foreground whitespace-nowrap">{task.dashboardOwner || '—'}</td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full ${b.cls}`}>
                           {b.label}
@@ -96,38 +96,25 @@ export function TasksTable({ tasks, pageSize = 50 }: TasksTableProps) {
           </table>
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-muted/20">
             <p className="text-xs text-muted-foreground">
               {tasks.length} tasks · Page {page} of {totalPages}
             </p>
             <div className="flex items-center gap-1">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="p-1.5 rounded-lg hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
+              <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded-lg hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                 <ChevronLeft size={16} />
               </button>
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 const pg = Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
                 if (pg > totalPages) return null;
                 return (
-                  <button
-                    key={pg}
-                    onClick={() => setPage(pg)}
-                    className={`w-7 h-7 rounded-lg text-xs font-medium transition-colors ${pg === page ? 'gradient-hero text-primary-foreground' : 'hover:bg-muted text-muted-foreground'}`}
-                  >
+                  <button key={pg} onClick={() => setPage(pg)} className={`w-7 h-7 rounded-lg text-xs font-medium transition-colors ${pg === page ? 'gradient-hero text-primary-foreground' : 'hover:bg-muted text-muted-foreground'}`}>
                     {pg}
                   </button>
                 );
               })}
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="p-1.5 rounded-lg hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
+              <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-1.5 rounded-lg hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                 <ChevronRight size={16} />
               </button>
             </div>
