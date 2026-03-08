@@ -130,15 +130,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (savedKpi && typeof savedKpi === 'object') setKpiConfigState(savedKpi);
 
         const savedData = loadDataFromStorage();
-        const hasNewSchema = savedData && savedData.length > 0 && 'summary' in savedData[0];
-        if (savedData && savedData.length > 0 && hasNewSchema) {
+        if (Array.isArray(savedData) && savedData.length > 0 && 'summary' in savedData[0]) {
           setData(savedData);
         } else {
-          const defaultData = await loadDefaultExcelData();
-          if (defaultData.length > 0) {
-            setData(defaultData);
-            saveDataToStorage(defaultData);
-          }
+          setData([]);
+          void loadDefaultExcelData()
+            .then((defaultData) => {
+              if (defaultData.length > 0) {
+                setData(defaultData);
+                saveDataToStorage(defaultData);
+              }
+            })
+            .catch((error) => {
+              console.error('Failed to load bundled default data:', error);
+            });
         }
       } catch (error) {
         console.error('Failed to initialize app state, falling back to defaults:', error);

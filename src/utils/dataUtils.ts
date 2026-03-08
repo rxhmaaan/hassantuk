@@ -170,12 +170,19 @@ export function readFileAsDataUrl(file: File): Promise<string> {
 }
 
 export async function loadDefaultExcelData(): Promise<ActionItem[]> {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 5000);
+
   try {
-    const resp = await fetch('/data/action-plan.xlsx');
+    const resp = await fetch('/data/action-plan.xlsx', { signal: controller.signal, cache: 'no-store' });
     if (!resp.ok) return [];
     const buffer = await resp.arrayBuffer();
     return parseExcelBuffer(new Uint8Array(buffer));
-  } catch { return []; }
+  } catch {
+    return [];
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
 }
 
 export function clearAllData() {
