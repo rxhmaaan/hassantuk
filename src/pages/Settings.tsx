@@ -455,42 +455,11 @@ export default function Settings() {
         </div>
       )}
 
-      {/* ========== TASKS ========== */}
       {activeTab === 'tasks' && (
         <div className="bg-card rounded-2xl shadow-card border border-border/50 overflow-hidden">
-          <SectionHeader icon={Edit2} title={`Edit Tasks (${data.length})`} desc="Modify status, remarks, owner, or delete tasks inline" />
-          <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
-            <table className="w-full text-sm">
-              <thead className="sticky top-0 z-10">
-                <tr className="border-b border-border bg-muted/50">
-                  <th className="text-left px-3 py-2.5 text-xs font-semibold text-muted-foreground w-10">#</th>
-                  <th className="text-left px-3 py-2.5 text-xs font-semibold text-muted-foreground min-w-[200px]">Planned Action</th>
-                  <th className="text-left px-3 py-2.5 text-xs font-semibold text-muted-foreground w-32">Owner</th>
-                  <th className="text-left px-3 py-2.5 text-xs font-semibold text-muted-foreground w-28">Status</th>
-                  <th className="text-left px-3 py-2.5 text-xs font-semibold text-muted-foreground min-w-[150px]">Remarks</th>
-                  <th className="text-left px-3 py-2.5 text-xs font-semibold text-muted-foreground w-20">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((task) => {
-                  const isEditing = editingTask === task.id;
-                  return (
-                    <tr key={task.id} className="border-b border-border/50 hover:bg-muted/20">
-                      <td className="px-3 py-2 text-xs text-muted-foreground">{task.id}</td>
-                      <td className="px-3 py-2">{isEditing ? <textarea value={taskEdits.plannedActions ?? task.plannedActions} onChange={(e) => setTaskEdits({ ...taskEdits, plannedActions: e.target.value })} className="w-full bg-background border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none resize-none" rows={2} /> : <p className="text-xs text-foreground line-clamp-2">{task.plannedActions}</p>}</td>
-                      <td className="px-3 py-2">{isEditing ? <input value={taskEdits.dashboardOwner ?? task.dashboardOwner} onChange={(e) => setTaskEdits({ ...taskEdits, dashboardOwner: e.target.value })} className="w-full bg-background border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none" /> : <span className="text-xs">{task.dashboardOwner}</span>}</td>
-                      <td className="px-3 py-2">{isEditing ? <select value={taskEdits.update ?? task.update} onChange={(e) => setTaskEdits({ ...taskEdits, update: e.target.value })} className="w-full bg-background border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none"><option value="">—</option>{ALL_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}</select> : <span className="text-xs">{task.update || '—'}</span>}</td>
-                      <td className="px-3 py-2">{isEditing ? <textarea value={taskEdits.remarks ?? task.remarks} onChange={(e) => setTaskEdits({ ...taskEdits, remarks: e.target.value })} className="w-full bg-background border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none resize-none" rows={2} /> : <p className="text-xs text-muted-foreground line-clamp-2">{task.remarks || '—'}</p>}</td>
-                      <td className="px-3 py-2">
-                        <div className="flex items-center gap-1">
-                          {isEditing ? (<><button onClick={() => { updateTask(task.id, taskEdits); setEditingTask(null); setTaskEdits({}); }} className="p-1.5 text-status-done hover:bg-status-done/10 rounded"><Save size={13} /></button><button onClick={() => { setEditingTask(null); setTaskEdits({}); }} className="p-1.5 text-muted-foreground hover:text-foreground rounded"><X size={13} /></button></>) : (<><button onClick={() => { setEditingTask(task.id); setTaskEdits({}); }} className="p-1.5 text-muted-foreground hover:text-foreground rounded hover:bg-muted"><Edit2 size={13} /></button><button onClick={() => { if (confirm('Delete?')) deleteTask(task.id); }} className="p-1.5 text-muted-foreground hover:text-status-rejected rounded hover:bg-muted"><Trash2 size={13} /></button></>)}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <SectionHeader icon={Edit2} title={`Spreadsheet Editor (${data.length} tasks)`} desc="Excel-like editor — double-click any cell to edit, Tab/Enter to navigate" />
+          <div className="px-4 py-4">
+            <SpreadsheetEditor />
           </div>
         </div>
       )}
