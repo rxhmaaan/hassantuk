@@ -6,14 +6,26 @@ import {
   KpiConfig, DEFAULT_KPI_CONFIG,
 } from '../types/actionPlan';
 import {
-  parseExcelFile, saveDataToStorage, loadDataFromStorage,
-  savePhotosToStorage, loadPhotosFromStorage, readFileAsDataUrl, photoFileToKey, loadDefaultExcelData,
-  saveOwnersConfig, loadOwnersConfig, saveColumnsConfig, loadColumnsConfig,
-  saveDashboardConfig, loadDashboardConfig, DashboardConfig, DEFAULT_DASHBOARD_CONFIG,
-  saveThemeConfig, loadThemeConfig, saveLayoutConfig, loadLayoutConfig,
-  saveBrandingConfig, loadBrandingConfig, saveStatusConfig, loadStatusConfig,
-  saveKpiConfig, loadKpiConfig,
+  parseExcelFile, readFileAsDataUrl, photoFileToKey, loadDefaultExcelData,
+  DashboardConfig, DEFAULT_DASHBOARD_CONFIG,
 } from '../utils/dataUtils';
+import {
+  dbLoadAllTasks, dbSaveAllTasks, dbUpdateTask, dbAddTask, dbDeleteTask,
+  dbLoadSetting, dbSaveSetting,
+  dbLoadAllPhotos, dbSavePhotos,
+} from '../utils/dbService';
+
+// Setting keys
+const SK = {
+  owners: 'owners_config',
+  columns: 'columns_config',
+  dashboard: 'dashboard_config',
+  theme: 'theme_config',
+  layout: 'layout_config',
+  branding: 'branding_config',
+  status: 'status_config',
+  kpi: 'kpi_config',
+};
 
 interface AppContextType {
   data: ActionItem[];
@@ -82,7 +94,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const sizeMap = { sm: '14px', base: '16px', lg: '18px' };
     root.style.fontSize = sizeMap[themeConfig.fontSize];
 
-    // Apply status colors from config
     statusConfig.forEach((sc) => {
       if (!sc?.key || !sc?.color) return;
       const cssKey = sc.key.toLowerCase().replace(/\s+/g, '-');
@@ -90,64 +101,60 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, [themeConfig, statusConfig]);
 
+  // Load everything from DB on mount
   useEffect(() => {
     const init = async () => {
       try {
-        const savedPhotos = loadPhotosFromStorage();
-        if (savedPhotos && typeof savedPhotos === 'object') setPhotos(savedPhotos);
+        // Load photos
+        const dbPhotos = await dbLoadAllPhotos();
+        if (Object.keys(dbPhotos).length > 0) setPhotos(dbPhotos);
 
-        const savedOwners = loadOwnersConfig();
-        if (Array.isArray(savedOwners)) setOwnersState(savedOwners);
+        // Load settings
+        const savedOwners = await dbLoadSetting<OwnerInfo[]>(SK.owners);
+        if (Array.isArray(savedOwners) && savedOwners.length > 0) setOwnersState(savedOwners);
 
-        const savedColumns = loadColumnsConfig();
-        if (Array.isArray(savedColumns)) setColumnsState(savedColumns);
+        const savedColumns = await dbLoadSetting<ColumnConfig[]>(SK.columns);
+        if (Array.isArray(savedColumns) && savedColumns.length > 0) setColumnsState(savedColumns);
 
-        const savedDashConfig = loadDashboardConfig();
+        const savedDashConfig = await dbLoadSetting<DashboardConfig>(SK.dashboard);
         if (savedDashConfig && typeof savedDashConfig === 'object') setDashboardConfigState(savedDashConfig);
 
-        const savedTheme = loadThemeConfig();
+        const savedTheme = await dbLoadSetting<ThemeConfig>(SK.theme);
         if (savedTheme && typeof savedTheme === 'object') setThemeConfigState(savedTheme);
 
-        const savedLayout = loadLayoutConfig();
+        const savedLayout = await dbLoadSetting<LayoutConfig>(SK.layout);
         if (savedLayout && typeof savedLayout === 'object') setLayoutConfigState(savedLayout);
 
-        const savedBranding = loadBrandingConfig();
+        const savedBranding = await dbLoadSetting<BrandingConfig>(SK.branding);
         if (savedBranding && typeof savedBranding === 'object') setBrandingConfigState(savedBranding);
 
-        const savedStatusCfg = loadStatusConfig();
+        const savedStatusCfg = await dbLoadSetting<StatusConfig[]>(SK.status);
         const safeStatusCfg = Array.isArray(savedStatusCfg)
           ? savedStatusCfg.filter(
               (sc): sc is StatusConfig =>
-                Boolean(sc) &&
-                typeof sc === 'object' &&
-                typeof sc.key === 'string' &&
-                typeof sc.color === 'string' &&
-                typeof sc.label === 'string'
+                Boolean(sc) && typeof sc === 'object' && typeof sc.key === 'string' &&
+                typeof sc.color === 'string' && typeof sc.label === 'string'
             )
           : null;
         if (safeStatusCfg && safeStatusCfg.length > 0) setStatusConfigState(safeStatusCfg);
 
-        const savedKpi = loadKpiConfig();
+        const savedKpi = await dbLoadSetting<KpiConfig>(SK.kpi);
         if (savedKpi && typeof savedKpi === 'object') setKpiConfigState(savedKpi);
 
-        const savedData = loadDataFromStorage();
-        if (Array.isArray(savedData) && savedData.length > 0 && 'summary' in savedData[0]) {
-          setData(savedData);
+        // Load tasks
+        const dbTasks = await dbLoadAllTasks();
+        if (dbTasks.length > 0) {
+          setData(dbTasks);
         } else {
-          setData([]);
-          void loadDefaultExcelData()
-            .then((defaultData) => {
-              if (defaultData.length > 0) {
-                setData(defaultData);
-                saveDataToStorage(defaultData);
-              }
-            })
-            .catch((error) => {
-              console.error('Failed to load bundled default data:', error);
-            });
+          // Try loading default Excel data
+          const defaultData = await loadDefaultExcelData();
+          if (defaultData.length > 0) {
+            setData(defaultData);
+            await dbSaveAllTasks(defaultData);
+          }
         }
       } catch (error) {
-        console.error('Failed to initialize app state, falling back to defaults:', error);
+        console.error('Failed to initialize app state from DB:', error);
       } finally {
         setIsLoaded(true);
       }
@@ -161,7 +168,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     try {
       if (excelFile) {
         const items = await parseExcelFile(excelFile);
-        setData(items); saveDataToStorage(items);
+        setData(items);
+        await dbSaveAllTasks(items);
       }
       if (photoFiles.length > 0) {
         const newPhotos: Record<string, string> = {};
@@ -169,33 +177,50 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const key = (photoKeyOverride && photoFiles.length === 1) ? photoKeyOverride : photoFileToKey(file.name);
           newPhotos[key] = await readFileAsDataUrl(file);
         }
-        setPhotos((prev) => { const merged = { ...prev, ...newPhotos }; savePhotosToStorage(newPhotos); return merged; });
+        setPhotos((prev) => ({ ...prev, ...newPhotos }));
+        await dbSavePhotos(newPhotos);
       }
     } finally { setUploading(false); }
   }, []);
 
-  const makeConfigSetter = <T,>(setState: React.Dispatch<React.SetStateAction<T>>, save: (v: T) => void) =>
-    useCallback((v: T) => { setState(v); save(v); }, []);
+  // Config setter factory — updates state + saves to DB
+  const makeConfigSetter = <T,>(
+    setState: React.Dispatch<React.SetStateAction<T>>,
+    settingKey: string,
+  ) =>
+    useCallback((v: T) => {
+      setState(v);
+      dbSaveSetting(settingKey, v);
+    }, []);
 
-  const setOwners = makeConfigSetter(setOwnersState, saveOwnersConfig);
-  const setColumns = makeConfigSetter(setColumnsState, saveColumnsConfig);
-  const setDashboardConfig = makeConfigSetter(setDashboardConfigState, saveDashboardConfig);
-  const setThemeConfig = makeConfigSetter(setThemeConfigState, saveThemeConfig);
-  const setLayoutConfig = makeConfigSetter(setLayoutConfigState, saveLayoutConfig);
-  const setBrandingConfig = makeConfigSetter(setBrandingConfigState, saveBrandingConfig);
-  const setStatusConfig = makeConfigSetter(setStatusConfigState, saveStatusConfig);
-  const setKpiConfig = makeConfigSetter(setKpiConfigState, saveKpiConfig);
+  const setOwners = makeConfigSetter(setOwnersState, SK.owners);
+  const setColumns = makeConfigSetter(setColumnsState, SK.columns);
+  const setDashboardConfig = makeConfigSetter(setDashboardConfigState, SK.dashboard);
+  const setThemeConfig = makeConfigSetter(setThemeConfigState, SK.theme);
+  const setLayoutConfig = makeConfigSetter(setLayoutConfigState, SK.layout);
+  const setBrandingConfig = makeConfigSetter(setBrandingConfigState, SK.branding);
+  const setStatusConfig = makeConfigSetter(setStatusConfigState, SK.status);
+  const setKpiConfig = makeConfigSetter(setKpiConfigState, SK.kpi);
 
   const updateTask = useCallback((id: number, updates: Partial<ActionItem>) => {
-    setData((prev) => { const u = prev.map((item) => item.id === id ? { ...item, ...updates } : item); saveDataToStorage(u); return u; });
+    setData((prev) => prev.map((item) => item.id === id ? { ...item, ...updates } : item));
+    dbUpdateTask(id, updates);
   }, []);
+
   const addTask = useCallback((task: ActionItem) => {
-    setData((prev) => { const u = [...prev, task]; saveDataToStorage(u); return u; });
+    setData((prev) => [...prev, task]);
+    dbAddTask(task);
   }, []);
+
   const deleteTask = useCallback((id: number) => {
-    setData((prev) => { const u = prev.filter((item) => item.id !== id); saveDataToStorage(u); return u; });
+    setData((prev) => prev.filter((item) => item.id !== id));
+    dbDeleteTask(id);
   }, []);
-  const clearData = useCallback(() => { setData([]); saveDataToStorage([]); }, []);
+
+  const clearData = useCallback(() => {
+    setData([]);
+    dbSaveAllTasks([]);
+  }, []);
 
   return (
     <AppContext.Provider value={{
