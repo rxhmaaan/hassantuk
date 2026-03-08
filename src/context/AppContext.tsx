@@ -207,7 +207,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       brandingConfig, setBrandingConfig,
       statusConfig, setStatusConfig,
       kpiConfig, setKpiConfig,
-      updateTask, deleteTask, clearData,
+      updateTask, addTask, deleteTask, clearData,
     }}>
       {children}
     </AppContext.Provider>
