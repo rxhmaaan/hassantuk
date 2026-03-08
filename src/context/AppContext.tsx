@@ -38,6 +38,7 @@ interface AppContextType {
   kpiConfig: KpiConfig;
   setKpiConfig: (v: KpiConfig) => void;
   updateTask: (id: number, updates: Partial<ActionItem>) => void;
+  addTask: (task: ActionItem) => void;
   deleteTask: (id: number) => void;
   clearData: () => void;
 }
